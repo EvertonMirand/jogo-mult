@@ -37,9 +37,21 @@
           const { playerId } = command;
           delete state.players[playerId];
         }
-        function movePlayer(command) {
-          console.log(`Moving ${command.playerId} with ${command.keyPressed}`);
 
+        function addFruit(command) {
+          const { fruitX, fruitId, fruitY } = command;
+          state.fruits[fruitId] = {
+            x: fruitX,
+            y: fruitY,
+          };
+        }
+
+        function removeFruit(command) {
+          const { fruitId } = command;
+          delete state.fruits[fruitId];
+        }
+
+        function movePlayer(command) {
           const acceptedMoves = {
             ArrowUp(player) {
               if (player.y - 1 >= 0) {
@@ -66,7 +78,19 @@
           const keyPressed = command.keyPressed;
           const player = state.players[command.playerId];
           const moveFunction = acceptedMoves[keyPressed];
-          moveFunction && moveFunction(player);
+          player &&
+            moveFunction &&
+            moveFunction(player) | checkForFruitCollision(playerId);
+        }
+
+        function checkForFruitCollision(playerId) {
+          const player = state.players[playerId];
+          for (const fruitId in state.fruits) {
+            const fruit = state.fruits[fruitId];
+            if (player.x === fruit.x && player.y === fruit.y) {
+              removeFruit({ fruitId });
+            }
+          }
         }
 
         return {
@@ -74,12 +98,18 @@
           state,
           addPlayer,
           removePlayer,
+          addFruit,
+          removeFruit,
+          checkForFruitCollision,
         };
       }
 
       const game = createGame();
       const keyboardListener = createKeyboardListener();
       keyboardListener.subscribe(game.movePlayer);
+
+      game.addPlayer({ playerId: 'player1', playerX: 0, playerY: 0 });
+      game.addFruit({ fruitId: 'fruit1', fruitX: 3, fruitY: 3 });
 
       function createKeyboardListener() {
         const state = {
@@ -91,8 +121,6 @@
         }
 
         function notifyAll(command) {
-          console.log(`Notifying ${state.observers.length} observers`);
-
           for (const observerFunction of state.observers) {
             observerFunction(command);
           }
