@@ -14,9 +14,14 @@ app.use(express.static('public'));
 const game = createGame();
 
 sockets.on('connection', socket => {
-  const player = socket.id;
-  console.log(`Player connect on server with id ${player}`);
+  const playerId = socket.id;
+  console.log(`Player connect on server with id ${playerId}`);
+  game.addPlayer({ playerId });
   socket.emit('setup', game.state);
+
+  socket.on('disconnect', () => {
+    game.removePlayer({ playerId });
+  });
 });
 
 server.listen(3000, () => {

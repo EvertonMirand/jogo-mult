@@ -8,7 +8,14 @@ export default function createGame() {
     },
   };
   function addPlayer(command) {
-    const { playerX, playerId, playerY } = command;
+    let { playerX, playerId, playerY } = command;
+    playerX = playerX
+      ? playerX
+      : Math.floor(Math.random() * state.screen.width);
+    playerY = playerY
+      ? playerY
+      : Math.floor(Math.random() * state.screen.height);
+
     state.players[playerId] = {
       x: playerX,
       y: playerY,
@@ -79,6 +86,10 @@ export default function createGame() {
     }
   }
 
+  function setState(newState) {
+    Object.assign(state, newState);
+  }
+
   return {
     movePlayer,
     state,
@@ -87,5 +98,6 @@ export default function createGame() {
     addFruit,
     removeFruit,
     checkForFruitCollision,
+    setState,
   };
 }
