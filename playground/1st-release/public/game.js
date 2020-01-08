@@ -10,6 +10,11 @@ export default function createGame() {
 
   const observers = [];
 
+  function start() {
+    const frequency = 2000;
+    setInterval(addFruit, frequency);
+  }
+
   function subscribe(obeserveFunction) {
     observers.push(obeserveFunction);
   }
@@ -55,17 +60,30 @@ export default function createGame() {
     });
   }
 
-  function addFruit(command) {
-    const { fruitX, fruitId, fruitY } = command;
+  function addFruit(command = {}) {
+    let { fruitX, fruitId, fruitY } = command;
+    fruitId = fruitId ? fruitId : Math.floor(Math.random() * 1000000);
+    fruitX = fruitX ? fruitX : Math.floor(Math.random() * state.screen.width);
+    fruitY = fruitY ? fruitY : Math.floor(Math.random() * state.screen.height);
     state.fruits[fruitId] = {
       x: fruitX,
       y: fruitY,
     };
+    notifyAll({
+      type: 'add-fruit',
+      fruitX,
+      fruitId,
+      fruitY,
+    });
   }
 
   function removeFruit(command) {
     const { fruitId } = command;
     delete state.fruits[fruitId];
+    notifyAll({
+      type: 'remove-fruit',
+      fruitId,
+    });
   }
 
   function movePlayer(command) {
@@ -125,5 +143,6 @@ export default function createGame() {
     checkForFruitCollision,
     setState,
     subscribe,
+    start,
   };
 }
